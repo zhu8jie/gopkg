@@ -13,7 +13,7 @@ go get github.com/wangxin1248/gparser
 使用方式：
 
 ```go
-import "github.com/wangxin1248/gparser"
+import "github.com/zhu8jie/gopkg/ruleengine"
 
 ruleStr := "!(a == 1 && b == 2 && c == "test" && d == false)"
 
@@ -52,12 +52,3 @@ fmt.Println(result)
 - `-`：int、int64支持
 - `*`：int、int64支持
 - `/`：int、int64支持
-
-性能对比
-
-```shell
-BenchmarkGParser_Match-8              127189          8912   ns/op     // gparser
-BenchmarkGval_Match-8                 63584           18358  ns/op     // gval
-BenchmarkGovaluateParser_Match-8      13628           86955  ns/op     // govaluate
-BenchmarkYqlParser_Match-8            10364           112481 ns/op     // yql
-```
