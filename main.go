@@ -8,7 +8,7 @@ import (
 
 /**
  * @Description
- * @Author weiyanwei
+ * @Author zhu8jie
  * @Date 2022/7/11 21:02
  **/
 
@@ -21,7 +21,7 @@ func main() {
 		"a": 1,
 		"b": 2,
 		"c": "test",
-		"d": true,
+		"d": false,
 	}
 
 	result, err := ruleengine.Match(ruleStr, params)
