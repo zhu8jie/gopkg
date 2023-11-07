@@ -28,6 +28,15 @@ type Xmulti struct {
 	logger           *zap.SugaredLogger
 }
 
+/*
+* HandlerFunc 执行方法
+* limit 并行协程数量
+* multiCnt 一次执行的数量
+* retryCount 如果方法返回一场，重试次数
+* name 并发起名称
+* multiTimeout 一次执行的超时设置，在这个时间内，如果未达到一次执行的数量*multiCnt*也立即执行，应对数量产生太慢的情况。
+* logger 日志对象
+ */
 func New(f HandlerFunc, limit, multiCnt, retryCount int, name string, multiTimeout time.Duration, logger *zap.SugaredLogger) *Xmulti {
 	if logger == nil {
 		l, _ := zap.NewDevelopment()
@@ -73,6 +82,7 @@ func New(f HandlerFunc, limit, multiCnt, retryCount int, name string, multiTimeo
 		closeChan:        make(chan struct{}),
 		retryCount:       retryCount,
 		name:             name,
+		logger:           logger,
 	}
 
 	return p
@@ -169,6 +179,8 @@ func (p *Xmulti) runAction(ctx context.Context, i []InputParam) {
 				err = p.fun(ctx, i)
 				if err == nil {
 					break
+				} else {
+					p.logger.Errorf("xMulti||runAction retry||err=%v", p.name, err)
 				}
 			}
 		}

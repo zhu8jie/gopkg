@@ -13,7 +13,7 @@ func Parse(configPath string, dst interface{}) error {
 	if err != nil {
 		return errors.New(fmt.Sprintf("yaml file get err: %v ", err))
 	}
-	if err = yaml.Unmarshal(yamlFile, &dst); err != nil {
+	if err = yaml.Unmarshal(yamlFile, dst); err != nil {
 		return errors.New(fmt.Sprintf("yaml unmarshal: %v", err))
 	}
 
