@@ -5,6 +5,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"fmt"
 	"io"
 )
 
@@ -42,6 +43,7 @@ func pkcs5UnPadding(origData []byte) []byte {
 
 // =================== ECB ======================
 func AesEncryptECB(origData []byte, key []byte) (encrypted []byte) {
+
 	cipher, _ := aes.NewCipher(generateKey(key))
 	length := (len(origData) + aes.BlockSize) / aes.BlockSize
 	plain := make([]byte, length*aes.BlockSize)
@@ -61,7 +63,7 @@ func AesEncryptECB(origData []byte, key []byte) (encrypted []byte) {
 func AesDecryptECB(encrypted []byte, key []byte) (decrypted []byte) {
 	cipher, _ := aes.NewCipher(generateKey(key))
 	decrypted = make([]byte, len(encrypted))
-	//
+
 	for bs, be := 0, cipher.BlockSize(); bs < len(encrypted); bs, be = bs+cipher.BlockSize(), be+cipher.BlockSize() {
 		cipher.Decrypt(decrypted[bs:be], encrypted[bs:be])
 	}
@@ -110,4 +112,33 @@ func AesDecryptCFB(encrypted []byte, key []byte) (decrypted []byte) {
 	stream := cipher.NewCFBDecrypter(block, iv)
 	stream.XORKeyStream(encrypted, encrypted)
 	return encrypted
+}
+
+// 秘钥长度验证
+func validKey(key []byte) bool {
+	k := len(key)
+	switch k {
+	default:
+		return false
+	case 16, 24, 32:
+		return true
+	}
+}
+
+// PKCS5填充
+func PKCS5Padding(ciphertext []byte, blockSize int) []byte {
+	padding := blockSize - len(ciphertext)%blockSize
+	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
+	return append(ciphertext, padtext...)
+}
+
+// 去除PKCS5填充
+func PKCS5UnPadding(origData []byte) ([]byte, error) {
+	length := len(origData)
+	unpadding := int(origData[length-1])
+
+	if length < unpadding {
+		return nil, fmt.Errorf("invalid unpadding length")
+	}
+	return origData[:(length - unpadding)], nil
 }

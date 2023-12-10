@@ -3,7 +3,7 @@ package xbase64
 import "encoding/base64"
 
 func Base64Encrypt(data []byte) string {
-	return base64.RawURLEncoding.EncodeToString(data)
+	return base64.StdEncoding.EncodeToString(data)
 }
 
 func Base64Decrypt(data string) ([]byte, error) {
