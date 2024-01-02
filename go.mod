@@ -8,7 +8,7 @@ require (
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/lestrrat-go/strftime v1.0.6 // indirect
-	go.uber.org/zap v1.25.0
+	go.uber.org/zap v1.26.1-0.20231214234619-d27427d23f81
 	gopkg.in/yaml.v2 v2.4.0
 	xorm.io/xorm v1.3.2
 )
