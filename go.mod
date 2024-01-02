@@ -1,6 +1,6 @@
 module github.com/zhu8jie/gopkg
 
-go 1.17
+go 1.16
 
 require (
 	github.com/Shopify/sarama v1.29.2-0.20210909081634-bd4c97221f00
