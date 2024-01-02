@@ -99,7 +99,7 @@ func EncryptDES(data, key string) ([]byte, error) {
 func DecryptDES(data []byte, key string) (string, error) {
 	bKey := []byte(key)
 
-	block, err := GetBlock("3DES", bKey)
+	block, err := GetBlock("DES", bKey)
 	if err != nil {
 		return "", err
 	}
@@ -110,7 +110,7 @@ func Encrypt3DES(data, key string) ([]byte, error) {
 	bData := []byte(data)
 	bKey := []byte(key)
 
-	block, err := GetBlock("DES", bKey)
+	block, err := GetBlock("3DES", bKey)
 	if err != nil {
 		return nil, err
 	}
