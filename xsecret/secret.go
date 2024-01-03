@@ -19,6 +19,9 @@ const (
 )
 
 func Encrypt(t ScType, in, key string) (string, error) {
+	if in == "" {
+		return "", nil
+	}
 	switch t {
 	case SCTYPE_DES:
 		b, err := xdes.EncryptDES(in, key)

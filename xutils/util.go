@@ -1,9 +1,14 @@
 package xutils
 
 import (
+	"crypto/md5"
+	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"flag"
 	"fmt"
+	"hash/crc32"
+	"net/url"
 	"os"
 	"os/signal"
 	"strconv"
@@ -63,4 +68,46 @@ func GetFlagPath(input ...string) (map[string]string, error) {
 	}
 
 	return ret, nil
+}
+
+func UrlEncode(strin string) string {
+	if len(strin) > 0 {
+		return url.QueryEscape(strin)
+	}
+	return ""
+}
+
+func Base64Encode(strin string) string {
+	if len(strin) > 0 {
+		return base64.RawURLEncoding.EncodeToString([]byte(strin))
+	} else {
+		return ""
+	}
+}
+
+func Base64Decode(strin string) string {
+	if len(strin) > 0 {
+		tmpres, _ := base64.RawURLEncoding.DecodeString(strin)
+		return string(tmpres)
+	} else {
+		return ""
+	}
+}
+
+func Md5(strin string) string {
+	if strin == "" {
+		return ""
+	}
+	h := md5.New()
+	h.Write([]byte(strin))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+func Crc(strin string) uint32 {
+	if len(strin) < 64 {
+		var scratch [64]byte
+		copy(scratch[:], strin)
+		return crc32.ChecksumIEEE(scratch[:len(strin)])
+	}
+	return crc32.ChecksumIEEE([]byte(strin))
 }
