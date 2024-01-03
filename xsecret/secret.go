@@ -6,6 +6,7 @@ import (
 	"github.com/zhu8jie/gopkg/xsecret/xaes"
 	"github.com/zhu8jie/gopkg/xsecret/xbase64"
 	"github.com/zhu8jie/gopkg/xsecret/xdes"
+	"github.com/zhu8jie/gopkg/xsecret/xrc4"
 )
 
 type ScType int
@@ -16,6 +17,7 @@ const (
 	SCTYPE_AES_CBC
 	SCTYPE_AES_ECB
 	SCTYPE_AES_CFB
+	SCTYPE_RC4
 )
 
 func Encrypt(t ScType, in, key string) (string, error) {
@@ -44,6 +46,9 @@ func Encrypt(t ScType, in, key string) (string, error) {
 	case SCTYPE_AES_CFB:
 		b := xaes.AesEncryptCFB([]byte(in), []byte(key))
 		return xbase64.Base64Encrypt(b), nil
+	case SCTYPE_RC4:
+		b := xrc4.Encrypt([]byte(in), []byte(key))
+		return xbase64.Base64Encrypt(b), nil
 	default:
 		return "", errors.New("sctype not exist.")
 	}
@@ -67,6 +72,9 @@ func Decrypt(t ScType, in, key string) (string, error) {
 		return string(b), nil
 	case SCTYPE_AES_CFB:
 		b := xaes.AesDecryptCFB(data, []byte(key))
+		return string(b), nil
+	case SCTYPE_RC4:
+		b := xrc4.Decrypt(data, []byte(key))
 		return string(b), nil
 	default:
 		return "", errors.New("sctype not exist.")
