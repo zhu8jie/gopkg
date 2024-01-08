@@ -47,7 +47,10 @@ func Encrypt(t ScType, in, key string) (string, error) {
 		b := xaes.AesEncryptCFB([]byte(in), []byte(key))
 		return xbase64.Base64Encrypt(b), nil
 	case SCTYPE_RC4:
-		b := xrc4.Encrypt([]byte(in), []byte(key))
+		b, err := xrc4.Encrypt([]byte(in), []byte(key))
+		if err != nil {
+			return "", err
+		}
 		return xbase64.Base64Encrypt(b), nil
 	default:
 		return "", errors.New("sctype not exist.")
@@ -74,7 +77,10 @@ func Decrypt(t ScType, in, key string) (string, error) {
 		b := xaes.AesDecryptCFB(data, []byte(key))
 		return string(b), nil
 	case SCTYPE_RC4:
-		b := xrc4.Decrypt(data, []byte(key))
+		b, err := xrc4.Decrypt(data, []byte(key))
+		if err != nil {
+			return "", err
+		}
 		return string(b), nil
 	default:
 		return "", errors.New("sctype not exist.")

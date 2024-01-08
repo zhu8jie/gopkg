@@ -6,13 +6,13 @@ import (
 )
 
 func TestDo(t *testing.T) {
-	key := "abcdefg123456789"
+	key := ""
 	in := "300"
 
-	enStr := Encrypt([]byte(in), []byte(key))
-	fmt.Println(enStr)
+	enStr, err := Encrypt([]byte(in), []byte(key))
+	fmt.Println(enStr, err)
 
-	deStr := Decrypt(enStr, []byte(key))
-	fmt.Println(string(deStr))
+	deStr, err := Decrypt(enStr, []byte(key))
+	fmt.Println(string(deStr), err)
 
 }
