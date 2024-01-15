@@ -40,13 +40,22 @@ func StrToInt64(i string) int64 {
 	return ret
 }
 
+func IntToStr(i int) string {
+	return strconv.Itoa(i)
+}
+
 func StrToInt(i string) int {
 	ret, _ := strconv.Atoi(i)
 	return ret
 }
 
-func IntToStr(i int) string {
-	return strconv.Itoa(i)
+func Float64ToStr(i float64) string {
+	return strconv.FormatFloat(i, 'f', -1, 64)
+}
+
+func StrToFloat64(i string) float64 {
+	ret, _ := strconv.ParseFloat(i, 64)
+	return ret
 }
 
 func GetFlagPath(input ...string) (map[string]string, error) {
