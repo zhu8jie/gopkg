@@ -49,8 +49,8 @@ func GetAreaByIPLong(ipLong int) *IpArea {
 	return nil
 }
 
-func init() {
-	fi, err := os.Open("./ip.labe")
+func Init(ipFile string) {
+	fi, err := os.Open(ipFile)
 	if err != nil {
 		fmt.Printf("init file open error: %s\n", err)
 		return
