@@ -2,7 +2,6 @@ package xip
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"os"
 	"strconv"
@@ -22,7 +21,6 @@ var ipAreaTable []*IpArea
 // GetAreaIDByIPLong 二分查找
 func GetAreaByIPLong(ipLong int) *IpArea {
 	if len(ipAreaTable) == 0 {
-		fmt.Println("yanw_test")
 		return nil
 	}
 	//查找start之后的
