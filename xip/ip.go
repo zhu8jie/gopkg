@@ -19,7 +19,7 @@ type IpArea struct {
 
 var ipAreaTable []*IpArea
 
-//GetAreaIDByIPLong 二分查找
+// GetAreaIDByIPLong 二分查找
 func GetAreaByIPLong(ipLong int) *IpArea {
 	if len(ipAreaTable) == 0 {
 		fmt.Println("yanw_test")
@@ -49,11 +49,11 @@ func GetAreaByIPLong(ipLong int) *IpArea {
 	return nil
 }
 
-func Init(ipFile string) {
+func Init(ipFile string) error {
 	fi, err := os.Open(ipFile)
 	if err != nil {
-		fmt.Printf("init file open error: %s\n", err)
-		return
+		// fmt.Printf("init file open error: %s\n", err)
+		return err
 	}
 	defer fi.Close()
 
@@ -80,6 +80,7 @@ func Init(ipFile string) {
 			})
 		}
 	}
+	return nil
 }
 
 func Ip2Long(ip string) int {
