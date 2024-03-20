@@ -7,6 +7,14 @@ import (
 	"go.uber.org/zap"
 )
 
+type KafkaAssignor string
+
+const (
+	KAFKA_ASSIGNOR_RANGE      KafkaAssignor = "range"
+	KAFKA_ASSIGNOR_STICKY     KafkaAssignor = "sticky"
+	KAFKA_ASSIGNOR_ROUNDROBIN KafkaAssignor = "roundrobin"
+)
+
 // 定义消费者组处理函数
 type ConsumerGroupHandler struct {
 	f func(message *sarama.ConsumerMessage)
@@ -29,58 +37,59 @@ func (h ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, 
 	return nil
 }
 
-type KafkaQueue struct {
-	addrs    []string
-	topics   []string
-	groupId  string
-	assignor string // sticky, roundrobin, range
-	log      *zap.SugaredLogger
+type KafkaConsumerGroup struct {
+	topics       []string
+	logger       *zap.SugaredLogger
+	consumerGrop *sarama.ConsumerGroup
 }
 
-func NewKafkaQueue(addrs, topics []string, groupId string, assignor string, log *zap.SugaredLogger) *KafkaQueue {
-	return &KafkaQueue{
-		addrs:    addrs,
-		topics:   topics,
-		groupId:  groupId,
-		assignor: assignor,
-		log:      log,
-	}
-}
-
-func (cfg *KafkaQueue) Start(f func(message *sarama.ConsumerMessage)) (err error) {
+func NewKafkaConsumerGroup(addrs, topics []string, groupId string, assignor KafkaAssignor, log *zap.SugaredLogger) (*KafkaConsumerGroup, error) {
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
 	config.Version = sarama.V2_3_0_0 // 指定 Kafka 版本
 
-	switch cfg.assignor {
-	case "sticky":
+	switch assignor {
+	case KAFKA_ASSIGNOR_STICKY:
 		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategySticky
-	case "roundrobin":
+	case KAFKA_ASSIGNOR_ROUNDROBIN:
 		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
-	case "range":
+	case KAFKA_ASSIGNOR_RANGE:
 		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
 	default:
 		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
 	}
 
 	// 创建消费者组
-	cg, err := sarama.NewConsumerGroup(cfg.addrs, cfg.groupId, config)
+	cg, err := sarama.NewConsumerGroup(addrs, groupId, config)
 	if err != nil {
-		return err
+		return nil, err
 	}
+
+	return &KafkaConsumerGroup{
+		topics:       topics,
+		logger:       log,
+		consumerGrop: &cg,
+	}, nil
+}
+
+func (kcg *KafkaConsumerGroup) Start(f func(message *sarama.ConsumerMessage)) {
 
 	handler := ConsumerGroupHandler{
 		f: f,
 	}
 
+	cg := *kcg.consumerGrop
 	// 开始消费
 	go func() {
 		for {
-			if err := cg.Consume(context.Background(), cfg.topics, handler); err != nil {
-				cfg.log.Errorf("consuer topics: %v groupId: %v error %v", cfg.topics, cfg.groupId, err)
+			if err := cg.Consume(context.Background(), kcg.topics, handler); err != nil {
+				kcg.logger.Errorf("consuer topics: %v error: %v", kcg.topics, err)
 			}
 		}
 	}()
+}
 
-	return nil
+func (kcg *KafkaConsumerGroup) Close() error {
+	cg := *kcg.consumerGrop
+	return cg.Close()
 }
