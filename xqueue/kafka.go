@@ -90,6 +90,7 @@ func (kcg *KafkaConsumerGroup) Start(f func(message *sarama.ConsumerMessage)) {
 }
 
 func (kcg *KafkaConsumerGroup) Close() error {
+	kcg.logger.Debugf("yanw_test %v is closed", kcg.topics)
 	cg := *kcg.consumerGrop
 	return cg.Close()
 }
