@@ -46,7 +46,7 @@ type KafkaConsumerGroup struct {
 func NewKafkaConsumerGroup(addrs, topics []string, groupId string, assignor KafkaAssignor, log *zap.SugaredLogger) (*KafkaConsumerGroup, error) {
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
-	config.Version = sarama.V2_3_0_0 // 指定 Kafka 版本
+	// config.Version = sarama.V2_3_0_0 // 指定 Kafka 版本
 
 	switch assignor {
 	case KAFKA_ASSIGNOR_STICKY:
@@ -59,20 +59,20 @@ func NewKafkaConsumerGroup(addrs, topics []string, groupId string, assignor Kafk
 		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
 	}
 
-	cli, err := sarama.NewClient(addrs, config)
-	if err != nil {
-		return nil, err
-	}
-	consumerGroup, err := sarama.NewConsumerGroupFromClient(groupId, cli)
-	if err != nil {
-		return nil, err
-	}
-
-	// // 创建消费者组
-	// cg, err := sarama.NewConsumerGroup(addrs, groupId, config)
+	// cli, err := sarama.NewClient(addrs, config)
 	// if err != nil {
 	// 	return nil, err
 	// }
+	// consumerGroup, err := sarama.NewConsumerGroupFromClient(groupId, cli)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// 创建消费者组
+	cg, err := sarama.NewConsumerGroup(addrs, groupId, config)
+	if err != nil {
+		return nil, err
+	}
 
 	// Track errors
 	// go func() {
@@ -84,7 +84,7 @@ func NewKafkaConsumerGroup(addrs, topics []string, groupId string, assignor Kafk
 	return &KafkaConsumerGroup{
 		topics:       topics,
 		logger:       log,
-		consumerGrop: consumerGroup,
+		consumerGrop: cg,
 	}, nil
 }
 
