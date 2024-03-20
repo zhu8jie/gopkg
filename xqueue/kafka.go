@@ -20,11 +20,11 @@ type ConsumerGroupHandler struct {
 	f func(message *sarama.ConsumerMessage)
 }
 
-func (h ConsumerGroupHandler) Setup(_ sarama.ConsumerGroupSession) error {
+func (h ConsumerGroupHandler) Setup(sarama.ConsumerGroupSession) error {
 	return nil
 }
 
-func (h ConsumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error {
+func (h ConsumerGroupHandler) Cleanup(sarama.ConsumerGroupSession) error {
 	return nil
 }
 
@@ -32,7 +32,7 @@ func (h ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, 
 	for message := range claim.Messages() {
 		// fmt.Printf("Message topic:%q partition:%d offset:%d value:%s\n", message.Topic, message.Partition, message.Offset, string(message.Value))
 		h.f(message)
-		// session.MarkMessage(message, "")
+		session.MarkMessage(message, "")
 	}
 	return nil
 }
