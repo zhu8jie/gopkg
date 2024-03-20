@@ -87,10 +87,8 @@ func (kcg *KafkaConsumerGroup) Start(f func(message *sarama.ConsumerMessage)) {
 			f: f,
 		}
 
-		for {
-			if err := kcg.consumerGrop.Consume(context.Background(), kcg.topics, handler); err != nil {
-				kcg.logger.Errorf("consuer topics: %v error: %v", kcg.topics, err)
-			}
+		if err := kcg.consumerGrop.Consume(context.Background(), kcg.topics, handler); err != nil {
+			kcg.logger.Errorf("consuer topics: %v error: %v", kcg.topics, err)
 		}
 	}()
 }
