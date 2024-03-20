@@ -40,7 +40,7 @@ func (h ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, 
 type KafkaConsumerGroup struct {
 	topics       []string
 	logger       *zap.SugaredLogger
-	consumerGrop *sarama.ConsumerGroup
+	consumerGrop sarama.ConsumerGroup
 }
 
 func NewKafkaConsumerGroup(addrs, topics []string, groupId string, assignor KafkaAssignor, log *zap.SugaredLogger) (*KafkaConsumerGroup, error) {
@@ -68,7 +68,7 @@ func NewKafkaConsumerGroup(addrs, topics []string, groupId string, assignor Kafk
 	return &KafkaConsumerGroup{
 		topics:       topics,
 		logger:       log,
-		consumerGrop: &cg,
+		consumerGrop: cg,
 	}, nil
 }
 
@@ -78,11 +78,10 @@ func (kcg *KafkaConsumerGroup) Start(f func(message *sarama.ConsumerMessage)) {
 		f: f,
 	}
 
-	cg := *kcg.consumerGrop
 	// 开始消费
 	go func() {
 		for {
-			if err := cg.Consume(context.Background(), kcg.topics, handler); err != nil {
+			if err := kcg.consumerGrop.Consume(context.Background(), kcg.topics, handler); err != nil {
 				kcg.logger.Errorf("consuer topics: %v error: %v", kcg.topics, err)
 			}
 		}
@@ -91,6 +90,5 @@ func (kcg *KafkaConsumerGroup) Start(f func(message *sarama.ConsumerMessage)) {
 
 func (kcg *KafkaConsumerGroup) Close() error {
 	kcg.logger.Debugf("yanw_test %v is closed", kcg.topics)
-	cg := *kcg.consumerGrop
-	return cg.Close()
+	return kcg.consumerGrop.Close()
 }
