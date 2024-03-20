@@ -66,11 +66,11 @@ func NewKafkaConsumerGroup(addrs, topics []string, groupId string, assignor Kafk
 	}
 
 	// Track errors
-	go func() {
-		for err := range cg.Errors() {
-			log.Errorf("track error: %v", err)
-		}
-	}()
+	// go func() {
+	// 	for err := range cg.Errors() {
+	// 		log.Errorf("track error: %v", err)
+	// 	}
+	// }()
 
 	return &KafkaConsumerGroup{
 		topics:       topics,
