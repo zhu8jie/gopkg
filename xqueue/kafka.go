@@ -47,7 +47,7 @@ func NewKafkaQueue(addrs, topics []string, groupId string, assignor string, log 
 	}
 }
 
-func (cfg *KafkaQueue) Start(f func(message *sarama.ConsumerMessage)) (consumerGroup *sarama.ConsumerGroup, err error) {
+func (cfg *KafkaQueue) Start(f func(message *sarama.ConsumerMessage)) (err error) {
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
 	config.Version = sarama.V2_3_0_0 // 指定 Kafka 版本
@@ -66,7 +66,7 @@ func (cfg *KafkaQueue) Start(f func(message *sarama.ConsumerMessage)) (consumerG
 	// 创建消费者组
 	cg, err := sarama.NewConsumerGroup(cfg.addrs, cfg.groupId, config)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	handler := ConsumerGroupHandler{
@@ -82,5 +82,5 @@ func (cfg *KafkaQueue) Start(f func(message *sarama.ConsumerMessage)) (consumerG
 		}
 	}()
 
-	return &cg, nil
+	return nil
 }
