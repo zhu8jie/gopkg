@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Shopify/sarama"
+	"go.uber.org/zap"
 )
 
 // 定义消费者组处理函数
@@ -28,20 +29,30 @@ func (h ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, 
 	return nil
 }
 
-type KafkaConfig struct {
-	Addrs    []string
-	Topics   []string
-	GroupId  string
-	Funcion  func(message *sarama.ConsumerMessage)
-	Assignor string // sticky, roundrobin, range
+type KafkaQueue struct {
+	addrs    []string
+	topics   []string
+	groupId  string
+	assignor string // sticky, roundrobin, range
+	log      *zap.SugaredLogger
 }
 
-func Start(cfg KafkaConfig) (consumerGroup *sarama.ConsumerGroup, err error) {
+func NewKafkaQueue(addrs, topics []string, groupId string, assignor string, log *zap.SugaredLogger) *KafkaQueue {
+	return &KafkaQueue{
+		addrs:    addrs,
+		topics:   topics,
+		groupId:  groupId,
+		assignor: assignor,
+		log:      log,
+	}
+}
+
+func (cfg *KafkaQueue) Start(f func(message *sarama.ConsumerMessage)) (consumerGroup *sarama.ConsumerGroup, err error) {
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
 	config.Version = sarama.V2_3_0_0 // 指定 Kafka 版本
 
-	switch cfg.Assignor {
+	switch cfg.assignor {
 	case "sticky":
 		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategySticky
 	case "roundrobin":
@@ -53,20 +64,20 @@ func Start(cfg KafkaConfig) (consumerGroup *sarama.ConsumerGroup, err error) {
 	}
 
 	// 创建消费者组
-	cg, err := sarama.NewConsumerGroup(cfg.Addrs, cfg.GroupId, config)
+	cg, err := sarama.NewConsumerGroup(cfg.addrs, cfg.groupId, config)
 	if err != nil {
 		return nil, err
 	}
 
 	handler := ConsumerGroupHandler{
-		f: cfg.Funcion,
+		f: f,
 	}
 
 	// 开始消费
 	go func() {
 		for {
-			if err := cg.Consume(context.Background(), cfg.Topics, handler); err != nil {
-				panic(err)
+			if err := cg.Consume(context.Background(), cfg.topics, handler); err != nil {
+				cfg.log.Errorf("consuer topics: %v groupId: %v error %v", cfg.topics, cfg.groupId, err)
 			}
 		}
 	}()
