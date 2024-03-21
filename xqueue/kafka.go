@@ -17,7 +17,8 @@ const (
 
 // 定义消费者组处理函数
 type ConsumerGroupHandler struct {
-	f func(message *sarama.ConsumerMessage) error
+	f      func(message *sarama.ConsumerMessage) error
+	logger *zap.SugaredLogger
 }
 
 func (h ConsumerGroupHandler) Setup(sarama.ConsumerGroupSession) error {
@@ -33,6 +34,7 @@ func (h ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, 
 		// fmt.Printf("Message topic:%q partition:%d offset:%d value:%s\n", message.Topic, message.Partition, message.Offset, string(message.Value))
 		err := h.f(message)
 		if err != nil {
+			h.logger.Errorf("ConsumeClaim error: %v topic: %v message: %v", err, message.Topic, string(message.Value))
 			continue
 		}
 		// 如果对消息不能重复消费，请把标记代码打开，先处理再标记，做到消息不丢失
@@ -97,7 +99,8 @@ func (kcg *KafkaConsumerGroup) Start(f func(message *sarama.ConsumerMessage) err
 	// 开始消费
 	go func() {
 		handler := ConsumerGroupHandler{
-			f: f,
+			f:      f,
+			logger: kcg.logger,
 		}
 
 		if err := kcg.consumerGrop.Consume(context.Background(), kcg.topics, handler); err != nil {
