@@ -50,20 +50,20 @@ type KafkaConsumerGroup struct {
 }
 
 func NewKafkaConsumerGroup(addrs, topics []string, groupId string, assignor KafkaAssignor, log *zap.SugaredLogger) (*KafkaConsumerGroup, error) {
-	config := sarama.NewConfig()
-	config.Consumer.Return.Errors = true
+	// config := sarama.NewConfig()
+	// config.Consumer.Return.Errors = true
 	// config.Version = sarama.V2_3_0_0 // 指定 Kafka 版本
 
-	switch assignor {
-	case KAFKA_ASSIGNOR_STICKY:
-		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategySticky
-	case KAFKA_ASSIGNOR_ROUNDROBIN:
-		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
-	case KAFKA_ASSIGNOR_RANGE:
-		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
-	default:
-		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
-	}
+	// switch assignor {
+	// case KAFKA_ASSIGNOR_STICKY:
+	// 	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategySticky
+	// case KAFKA_ASSIGNOR_ROUNDROBIN:
+	// 	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
+	// case KAFKA_ASSIGNOR_RANGE:
+	// 	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+	// default:
+	// 	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+	// }
 
 	// cli, err := sarama.NewClient(addrs, config)
 	// if err != nil {
@@ -75,7 +75,7 @@ func NewKafkaConsumerGroup(addrs, topics []string, groupId string, assignor Kafk
 	// }
 
 	// 创建消费者组
-	cg, err := sarama.NewConsumerGroup(addrs, groupId, config)
+	cg, err := sarama.NewConsumerGroup(addrs, groupId, nil)
 	if err != nil {
 		return nil, err
 	}
