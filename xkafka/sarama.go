@@ -166,6 +166,7 @@ func NewSaramaConsumerGroup(conf *ConsumerGroupConf) (*SaramaConsumerGroup, erro
 
 	config := sarama.NewConfig()
 	config.Version = sarama.V2_2_0_0
+	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
 
 	if conf.GroupId == "" {
 		conf.GroupId = xutils.Int64ToStr(time.Now().UnixNano())
