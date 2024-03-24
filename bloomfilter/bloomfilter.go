@@ -1,4 +1,4 @@
-package bloomx
+package bloomfilter
 
 import (
 	"github.com/bits-and-blooms/bitset"
