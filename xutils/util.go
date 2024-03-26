@@ -86,6 +86,14 @@ func UrlEncode(strin string) string {
 	return ""
 }
 
+func UrlDecode(strin string) string {
+	if len(strin) > 0 {
+		tmpres, _ := url.QueryUnescape(strin)
+		return tmpres
+	}
+	return ""
+}
+
 func Base64Encode(strin string) string {
 	if len(strin) > 0 {
 		return base64.RawURLEncoding.EncodeToString([]byte(strin))
