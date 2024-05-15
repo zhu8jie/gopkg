@@ -38,7 +38,7 @@ func Encrypt(t ScType, in, key string) (string, error) {
 		}
 		return xbase64.Base64Encrypt(b), nil
 	case SCTYPE_AES_CBC:
-		b := xaes.AesEncryptCBC([]byte(in), []byte(key))
+		b := xaes.AesEncryptCBC([]byte(in), []byte(key), nil)
 		return xbase64.Base64Encrypt(b), nil
 	case SCTYPE_AES_ECB:
 		b := xaes.AesEncryptECB([]byte(in), []byte(key))
@@ -68,7 +68,7 @@ func Decrypt(t ScType, in, key string) (string, error) {
 	case SCTYPE_3DES:
 		return xdes.Decrypt3DES(data, key)
 	case SCTYPE_AES_CBC:
-		b := xaes.AesDecryptCBC(data, []byte(key))
+		b := xaes.AesDecryptCBC(data, []byte(key), nil)
 		return string(b), nil
 	case SCTYPE_AES_ECB:
 		b := xaes.AesDecryptECB(data, []byte(key))
