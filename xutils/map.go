@@ -5,47 +5,60 @@ import (
 	"sync"
 )
 
-type LockMap struct {
-	m map[string]LockMapVal
-	l sync.RWMutex
+type MaxMap struct {
+	m      map[string]MapVal
+	l      sync.RWMutex
+	maxCnt int
 }
 
-type LockMapVal struct {
+type MapVal struct {
 	v   interface{}
 	err error
 }
 
 var LockMapNotExist error = errors.New("key is not exist.")
 
-func (v LockMap) Count() int {
+func NewMaxMap(maxCnt int) (*MaxMap, error) {
+	if maxCnt == 0 {
+		return nil, errors.New("maxCnt must > 0.")
+	}
+	ret := &MaxMap{
+		m:      make(map[string]MapVal, maxCnt),
+		maxCnt: maxCnt,
+		l:      sync.RWMutex{},
+	}
+	return ret, nil
+}
+
+func (v *MaxMap) Count() int {
 	return len(v.m)
 }
 
-func (v LockMap) Store(key string, value interface{}) {
+func (v *MaxMap) Store(key string, value interface{}) {
 	v.l.Lock()
-	v.m[key] = LockMapVal{
+	v.m[key] = MapVal{
 		v: value,
 	}
 	v.l.Unlock()
 }
 
-func (v LockMap) Load(key string) LockMapVal {
+func (v *MaxMap) Load(key string) MapVal {
 	v.l.RLock()
 	defer v.l.RUnlock()
 	ret, exist := v.m[key]
 	if !exist {
-		return LockMapVal{
+		return MapVal{
 			err: LockMapNotExist,
 		}
 	}
 	return ret
 }
 
-func (v LockMap) StoreOrLoad(key string, value interface{}) (ret LockMapVal, loaded bool) {
+func (v *MaxMap) StoreOrLoad(key string, value interface{}) (ret MapVal, loaded bool) {
 	l := v.Load(key)
 	if l.err != nil {
 		v.Store(key, value)
-		return LockMapVal{
+		return MapVal{
 			v: value,
 		}, true
 	} else {
@@ -53,30 +66,30 @@ func (v LockMap) StoreOrLoad(key string, value interface{}) (ret LockMapVal, loa
 	}
 }
 
-func (v LockMapVal) Error() error {
+func (v MapVal) Error() error {
 	return v.err
 }
 
-func (v LockMapVal) String() (string, bool) {
+func (v MapVal) String() (string, bool) {
 	ret, ok := v.v.(string)
 	return ret, ok
 }
 
-func (v LockMapVal) Int() (int, bool) {
+func (v MapVal) Int() (int, bool) {
 	ret, ok := v.v.(int)
 	return ret, ok
 }
 
-func (v LockMapVal) Int64() (int64, bool) {
+func (v MapVal) Int64() (int64, bool) {
 	ret, ok := v.v.(int64)
 	return ret, ok
 }
 
-func (v LockMapVal) Float64() (float64, bool) {
+func (v MapVal) Float64() (float64, bool) {
 	ret, ok := v.v.(float64)
 	return ret, ok
 }
 
-func (v LockMapVal) Val() interface{} {
+func (v MapVal) Val() interface{} {
 	return v.v
 }
