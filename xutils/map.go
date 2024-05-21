@@ -54,15 +54,15 @@ func (v *MaxMap) Load(key string) MapVal {
 	return ret
 }
 
-func (v *MaxMap) StoreOrLoad(key string, value interface{}) (ret MapVal, loaded bool) {
+func (v *MaxMap) LoadOrStore(key string, value interface{}) (ret MapVal, loaded bool) {
 	l := v.Load(key)
 	if l.err != nil {
 		v.Store(key, value)
 		return MapVal{
 			v: value,
-		}, true
+		}, false
 	} else {
-		return l, false
+		return l, true
 	}
 }
 
