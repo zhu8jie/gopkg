@@ -31,7 +31,15 @@ func NewMaxMap(maxCnt int) (*MaxMap, error) {
 }
 
 func (v *MaxMap) Count() int {
+	v.l.RLock()
+	defer v.l.RUnlock()
 	return len(v.m)
+}
+
+func (v *MaxMap) Overtop() bool {
+	v.l.RLock()
+	defer v.l.RUnlock()
+	return len(v.m) > v.maxCnt
 }
 
 func (v *MaxMap) Store(key string, value interface{}) {
