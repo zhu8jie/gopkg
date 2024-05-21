@@ -6,9 +6,10 @@ import (
 )
 
 type MaxMap struct {
-	m      map[string]MapVal
-	l      sync.RWMutex
-	maxCnt int
+	m       map[string]MapVal
+	l       sync.RWMutex
+	maxCnt  int
+	overtop bool
 }
 
 type MapVal struct {
@@ -23,9 +24,10 @@ func NewMaxMap(maxCnt int) (*MaxMap, error) {
 		return nil, errors.New("maxCnt must > 0.")
 	}
 	ret := &MaxMap{
-		m:      make(map[string]MapVal, maxCnt),
-		maxCnt: maxCnt,
-		l:      sync.RWMutex{},
+		m:       make(map[string]MapVal, maxCnt+1000),
+		maxCnt:  maxCnt,
+		l:       sync.RWMutex{},
+		overtop: false,
 	}
 	return ret, nil
 }
@@ -37,15 +39,16 @@ func (v *MaxMap) Count() int {
 }
 
 func (v *MaxMap) Overtop() bool {
-	v.l.RLock()
-	defer v.l.RUnlock()
-	return len(v.m) > v.maxCnt
+	return v.overtop
 }
 
 func (v *MaxMap) Store(key string, value interface{}) {
 	v.l.Lock()
 	v.m[key] = MapVal{
 		v: value,
+	}
+	if len(v.m) >= v.maxCnt {
+		v.overtop = true
 	}
 	v.l.Unlock()
 }
