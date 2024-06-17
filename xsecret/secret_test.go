@@ -2,11 +2,7 @@ package xsecret
 
 import (
 	"fmt"
-	"strconv"
 	"testing"
-
-	"github.com/zhu8jie/gopkg/xsecret/xaes"
-	"github.com/zhu8jie/gopkg/xsecret/xhex"
 )
 
 func TestEncrypt(t *testing.T) {
@@ -19,11 +15,18 @@ func TestEncrypt(t *testing.T) {
 	// 	t.Errorf("%v not equal %v", sss, "Fp599QWzjlqGb0SoX+RFBA==")
 	// }
 
-	dspWinPrice := 500
-	var dspWinPriceEcb string
-	if dspWinPrice > 0 {
-		b := xaes.AesEncryptECB([]byte(strconv.Itoa(dspWinPrice)), []byte("kJDnjt7MuK8wQ7K6"))
-		dspWinPriceEcb = string(xhex.HexEncode(string(b)))
+	str := "110"
+	key := "d39656591bc2c499cddba38da2b9da38"
+	// iv := "FD2718DD5C312460"
+	fmt.Println(len(key))
+	tmpKey := []byte(key)
+	fmt.Println(len(tmpKey), tmpKey)
+
+	encryptStr, err := Encrypt(SCTYPE_AES_ECB, str, key)
+	if err != nil {
+		fmt.Println(err)
 	}
-	fmt.Println("---", dspWinPriceEcb)
+	// s := xbase64.Base64Encrypt(encryptStr)
+
+	fmt.Println(encryptStr)
 }

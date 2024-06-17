@@ -8,14 +8,15 @@ import (
 )
 
 func TestAesEncryptCBC(t *testing.T) {
-	str := "66"
-	key := "f14a77bbba9389st"
-	iv := "FD2718DD5C312460"
-	fmt.Println(len(key))
-	tmpKey := []byte(key)
-	fmt.Println(len(tmpKey), tmpKey)
+	str := "110"
+	key := "d39656591bc2c499cddba38da2b9da38"
+	// iv := "FD2718DD5C312460"
+	// fmt.Println(len(key))
+	// tmpKey := []byte(key)
+	// fmt.Println(len(tmpKey), tmpKey)
 
-	encryptStr := AesEncryptCBC([]byte(str), []byte(key), []byte(iv))
+	encryptStr := AesEncryptECB([]byte(str), []byte(key))
+	s := xhex.HexEncode(string(encryptStr))
 
-	fmt.Println(string(xhex.HexEncode(string(encryptStr))))
+	fmt.Println(string(s))
 }
