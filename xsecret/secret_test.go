@@ -29,7 +29,10 @@ func TestEncrypt(t *testing.T) {
 	// if err != nil {
 	// 	fmt.Println(err)
 	// }
-	encryptStr := (xaes.AesEncryptECB([]byte(str), []byte(key)))
+	encryptStr, err := (xaes.AESEncryptZeroPadEcb([]byte(str), []byte(key)))
+	if err != nil {
+		fmt.Println("error: ", err)
+	}
 
 	s := xhex.HexEncode(string(encryptStr))
 
