@@ -9,6 +9,38 @@ import (
 	"io"
 )
 
+func zeroPad(data []byte, blockSize int) []byte {
+	padding := blockSize - (len(data) % blockSize)
+	padText := bytes.Repeat([]byte{0}, padding)
+	return append(data, padText...)
+}
+
+func unZeroPad(data []byte, blockSize int) ([]byte, error) {
+	length := len(data)
+	if length%blockSize != 0 {
+		return nil, fmt.Errorf("data is not block-size aligned")
+	}
+
+	for i := length - 1; i >= 0; i-- {
+		if data[i] != 0 {
+			return data[:i+1], nil
+		}
+	}
+
+	return nil, fmt.Errorf("data not padded")
+}
+
+func pkcs5Padding(ciphertext []byte, blockSize int) []byte {
+	padding := blockSize - len(ciphertext)%blockSize
+	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
+	return append(ciphertext, padtext...)
+}
+func pkcs5UnPadding(origData []byte) []byte {
+	length := len(origData)
+	unpadding := int(origData[length-1])
+	return origData[:(length - unpadding)]
+}
+
 // =================== CBC ======================
 func AesEncryptCBC(origData []byte, key, iv []byte) (encrypted []byte) {
 
@@ -40,16 +72,6 @@ func AesDecryptCBC(encrypted []byte, key, iv []byte) (decrypted []byte) {
 	blockMode.CryptBlocks(decrypted, encrypted)    // 解密
 	decrypted = pkcs5UnPadding(decrypted)          // 去除补全码
 	return decrypted
-}
-func pkcs5Padding(ciphertext []byte, blockSize int) []byte {
-	padding := blockSize - len(ciphertext)%blockSize
-	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
-	return append(ciphertext, padtext...)
-}
-func pkcs5UnPadding(origData []byte) []byte {
-	length := len(origData)
-	unpadding := int(origData[length-1])
-	return origData[:(length - unpadding)]
 }
 
 // =================== ECB ======================
@@ -97,6 +119,50 @@ func generateKey(key []byte) (genKey []byte) {
 	return genKey
 }
 
+func AESEncryptZeroPadEcb(data, key []byte) ([]byte, error) {
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+
+	// plaintext := []byte(data)
+	// Padding
+	data = zeroPad(data, aes.BlockSize)
+	ciphertext := make([]byte, len(data))
+
+	for start := 0; start < len(data); start += aes.BlockSize {
+		block.Encrypt(ciphertext[start:start+aes.BlockSize], data[start:start+aes.BlockSize])
+	}
+
+	return ciphertext, nil
+}
+
+func AESDecryptZeroPadEcb(data, key []byte) (string, error) {
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+
+	// ciphertext, err := base64.StdEncoding.DecodeString(data)
+	// if err != nil {
+	// 	return "", err
+	// }
+
+	plaintext := make([]byte, len(data))
+
+	for start := 0; start < len(data); start += aes.BlockSize {
+		block.Decrypt(plaintext[start:start+aes.BlockSize], data[start:start+aes.BlockSize])
+	}
+
+	// Unpadding
+	plaintext, err = unZeroPad(plaintext, aes.BlockSize)
+	if err != nil {
+		return "", err
+	}
+
+	return string(plaintext), nil
+}
+
 // =================== CFB ======================
 func AesEncryptCFB(origData []byte, key []byte) (encrypted []byte) {
 	block, err := aes.NewCipher(key)
@@ -134,22 +200,4 @@ func validKey(key []byte) bool {
 	case 16, 24, 32:
 		return true
 	}
-}
-
-// PKCS5填充
-func PKCS5Padding(ciphertext []byte, blockSize int) []byte {
-	padding := blockSize - len(ciphertext)%blockSize
-	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
-	return append(ciphertext, padtext...)
-}
-
-// 去除PKCS5填充
-func PKCS5UnPadding(origData []byte) ([]byte, error) {
-	length := len(origData)
-	unpadding := int(origData[length-1])
-
-	if length < unpadding {
-		return nil, fmt.Errorf("invalid unpadding length")
-	}
-	return origData[:(length - unpadding)], nil
 }

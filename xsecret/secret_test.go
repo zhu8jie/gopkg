@@ -3,6 +3,9 @@ package xsecret
 import (
 	"fmt"
 	"testing"
+
+	"github.com/zhu8jie/gopkg/xsecret/xaes"
+	"github.com/zhu8jie/gopkg/xsecret/xhex"
 )
 
 func TestEncrypt(t *testing.T) {
@@ -15,18 +18,20 @@ func TestEncrypt(t *testing.T) {
 	// 	t.Errorf("%v not equal %v", sss, "Fp599QWzjlqGb0SoX+RFBA==")
 	// }
 
-	str := "110"
-	key := "d39656591bc2c499cddba38da2b9da38"
+	str := "100"
+	key := "u5OvRj55tiWz0tLS"
 	// iv := "FD2718DD5C312460"
 	fmt.Println(len(key))
 	tmpKey := []byte(key)
 	fmt.Println(len(tmpKey), tmpKey)
 
-	encryptStr, err := Encrypt(SCTYPE_AES_ECB, str, key)
-	if err != nil {
-		fmt.Println(err)
-	}
-	// s := xbase64.Base64Encrypt(encryptStr)
+	// encryptStr, err := Encrypt(SCTYPE_AES_ECB, str, key)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	encryptStr := (xaes.AesEncryptECB([]byte(str), []byte(key)))
 
-	fmt.Println(encryptStr)
+	s := xhex.HexEncode(string(encryptStr))
+
+	fmt.Println(string(s))
 }

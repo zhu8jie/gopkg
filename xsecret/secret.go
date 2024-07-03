@@ -16,6 +16,7 @@ const (
 	SCTYPE_3DES
 	SCTYPE_AES_CBC
 	SCTYPE_AES_ECB
+	SCTYPE_AES_ECB_ZEROPAD
 	SCTYPE_AES_CFB
 	SCTYPE_RC4
 )
@@ -42,6 +43,12 @@ func Encrypt(t ScType, in, key string) (string, error) {
 		return xbase64.Base64Encrypt(b), nil
 	case SCTYPE_AES_ECB:
 		b := xaes.AesEncryptECB([]byte(in), []byte(key))
+		return xbase64.Base64Encrypt(b), nil
+	case SCTYPE_AES_ECB_ZEROPAD:
+		b, err := xaes.AESEncryptZeroPadEcb([]byte(in), []byte(key))
+		if err != nil {
+			return "", err
+		}
 		return xbase64.Base64Encrypt(b), nil
 	case SCTYPE_AES_CFB:
 		b := xaes.AesEncryptCFB([]byte(in), []byte(key))
@@ -72,6 +79,12 @@ func Decrypt(t ScType, in, key string) (string, error) {
 		return string(b), nil
 	case SCTYPE_AES_ECB:
 		b := xaes.AesDecryptECB(data, []byte(key))
+		return string(b), nil
+	case SCTYPE_AES_ECB_ZEROPAD:
+		b, err := xaes.AESDecryptZeroPadEcb(data, []byte(key))
+		if err != nil {
+			return "", err
+		}
 		return string(b), nil
 	case SCTYPE_AES_CFB:
 		b := xaes.AesDecryptCFB(data, []byte(key))
