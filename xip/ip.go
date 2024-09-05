@@ -4,14 +4,15 @@ import (
 	"bufio"
 	"io"
 	"os"
-	"strconv"
 	"strings"
+
+	"github.com/zhu8jie/gopkg/xutils"
 )
 
 type IpArea struct {
-	StartLong int
-	EndLong   int
-	AreaID    int
+	StartLong int64
+	EndLong   int64
+	AreaID    int64
 	Longitude float64
 	Latitude  float64
 }
@@ -19,7 +20,7 @@ type IpArea struct {
 var ipAreaTable []*IpArea
 
 // GetAreaIDByIPLong 二分查找
-func GetAreaByIPLong(ipLong int) *IpArea {
+func GetAreaByIPLong(ipLong int64) *IpArea {
 	if len(ipAreaTable) == 0 {
 		return nil
 	}
@@ -63,11 +64,11 @@ func Init(ipFile string) error {
 		}
 		data := strings.Split(string(a), ",")
 		if len(data) == 5 {
-			startLong, _ := strconv.Atoi(data[0])
-			endLong, _ := strconv.Atoi(data[1])
-			areaID, _ := strconv.Atoi(data[2])
-			longitude, _ := strconv.ParseFloat(data[3], 64)
-			latitude, _ := strconv.ParseFloat(data[4], 64)
+			startLong := xutils.StrToInt64(data[0])
+			endLong := xutils.StrToInt64(data[1])
+			areaID := xutils.StrToInt64(data[2])
+			longitude := xutils.StrToFloat64(data[3])
+			latitude := xutils.StrToFloat64(data[4])
 
 			ipAreaTable = append(ipAreaTable, &IpArea{
 				StartLong: startLong,
@@ -81,12 +82,12 @@ func Init(ipFile string) error {
 	return nil
 }
 
-func Ip2Long(ip string) int {
+func Ip2Long(ip string) int64 {
 	ipSegs := strings.Split(ip, ".")
-	var ipInt int = 0
+	var ipInt int64 = 0
 	var pos uint = 24
 	for _, ipSeg := range ipSegs {
-		tempInt, _ := strconv.Atoi(ipSeg)
+		tempInt := xutils.StrToInt64(ipSeg)
 		tempInt = tempInt << pos
 		ipInt = ipInt | tempInt
 		pos -= 8
@@ -94,7 +95,7 @@ func Ip2Long(ip string) int {
 	return ipInt
 }
 
-var chineseProvinceCode = []int{
+var chineseProvinceCode = []int64{
 	137101101100100,
 	137101102100100,
 	137101103100100,
@@ -129,4 +130,8 @@ var chineseProvinceCode = []int{
 	137107101100100,
 	137107102100100,
 	137107103100100,
+}
+
+func GetChineseProvinceCode() []int64 {
+	return chineseProvinceCode
 }
