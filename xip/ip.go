@@ -18,6 +18,7 @@ type IpArea struct {
 }
 
 var ipAreaTable []*IpArea
+var areaIds []int64
 
 // GetAreaIDByIPLong 二分查找
 func GetAreaByIPLong(ipLong int64) *IpArea {
@@ -56,6 +57,8 @@ func Init(ipFile string) error {
 	}
 	defer fi.Close()
 
+	areaIdMap := make(map[int64]struct{})
+
 	br := bufio.NewReader(fi)
 	for {
 		a, _, c := br.ReadLine()
@@ -77,6 +80,11 @@ func Init(ipFile string) error {
 				Longitude: longitude,
 				Latitude:  latitude,
 			})
+			if _, exist := areaIdMap[areaID]; !exist {
+				areaIds = append(areaIds, areaID)
+				areaIdMap[areaID] = struct{}{}
+			}
+
 		}
 	}
 	return nil
@@ -133,5 +141,5 @@ var chineseProvinceCode = []int64{
 }
 
 func GetChineseProvinceCode() []int64 {
-	return chineseProvinceCode
+	return areaIds
 }
