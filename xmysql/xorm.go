@@ -37,7 +37,9 @@ func NewXorm(conf *MySQLXormConf, writer io.Writer) (*xorm.Engine, error) {
 	engine.SetMaxIdleConns(conf.MaxIdle)
 	engine.SetMaxOpenConns(conf.MaxActive)
 	engine.SetConnMaxLifetime(time.Second * time.Duration(conf.MaxLife))
-	engine.SetLogger(log.NewSimpleLogger(writer))
+	if writer != nil {
+		engine.SetLogger(log.NewSimpleLogger(writer))
+	}
 	engine.ShowSQL(conf.ShowSQL)
 
 	return engine, engine.Ping()

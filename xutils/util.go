@@ -58,20 +58,30 @@ func StrToFloat64(i string) float64 {
 	return ret
 }
 
-func GetFlagPath(input ...string) (map[string]string, error) {
+func GetFlagPath(need []string, input ...string) (map[string]string, error) {
 	ret := make(map[string]string)
 
-	tr := make(map[string]*string)
+	needMap := make(map[string]*string)
+	for _, i := range need {
+		t := flag.String(i, "", "")
+		needMap[i] = t
+	}
+	inputMap := make(map[string]*string)
 	for _, i := range input {
 		t := flag.String(i, "", "")
-		tr[i] = t
+		inputMap[i] = t
 	}
 	flag.Parse()
 
-	for k, v := range tr {
+	for k, v := range needMap {
 		if *v == "" {
 			return nil, errors.New(fmt.Sprintf("Not found input flag -%s \n", k))
 		} else {
+			ret[k] = *v
+		}
+	}
+	for k, v := range inputMap {
+		if *v != "" {
 			ret[k] = *v
 		}
 	}

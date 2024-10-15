@@ -6,12 +6,18 @@ import (
 )
 
 func TestGetAreaByIPLong(t *testing.T) {
-	ip := "120.229.5.193"
+	Init("./ip.labe")
+
+	fmt.Println(GetChineseProvinceCode())
+
+	ip := "116.176.191.122"
 	ipLong := Ip2Long(ip)
 	fmt.Println(ipLong)
 
 	ipArea := GetAreaByIPLong(ipLong)
 	fmt.Println(ipArea == nil)
-	fmt.Println(ipArea.Longitude, ipArea.Latitude, ipArea.AreaID)
+	if ipArea != nil {
+		fmt.Println(ipArea.Longitude, ipArea.Latitude, ipArea.AreaID)
+	}
 
 }
