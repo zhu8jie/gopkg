@@ -20,7 +20,6 @@ func AppPid(c *gin.Context) {
 		"start_time": webStartTime,
 		"code":       http.StatusOK,
 	})
-	return
 }
 
 func GetRouter(model string, writer io.Writer) *gin.Engine {
