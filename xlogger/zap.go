@@ -90,7 +90,7 @@ func NewRotateWriter(conf *LogConf) (io.Writer, error) {
 				rotatelogs.WithClock(rotatelogs.Local), // 使用本地时区，走的是标准库time对象的时区
 				//rotatelogs.WithLinkName(path[1]),       // 生成软链，指向最新日志文件
 				rotatelogs.WithMaxAge(time.Duration(conf.MaxAge)*time.Hour), // 文件最大保存时间
-				rotatelogs.WithRotationSize(conf.MaxSize),                   // 日志切割时间间隔
+				rotatelogs.WithRotationSize(conf.MaxSize*1024*1024),         // 日志切割时间间隔
 			)
 		}
 	}
