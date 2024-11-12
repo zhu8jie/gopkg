@@ -15,13 +15,14 @@ import (
 type LogConf struct {
 	Filename string `json:"filename" yaml:"filename"`
 
+	// debug info warn error fatal panic
 	LogLevel string `json:"level" yaml:"level"`
 
 	IsStdOut bool `json:"stdout" yaml:"stdout"`
 
 	// MaxSize is the maximum size in megabytes of the logger file before it gets
 	// rotated. It defaults to 100 megabytes.
-	MaxSize int `json:"max_size" yaml:"max_size"`
+	MaxSize int64 `json:"max_size" yaml:"max_size"`
 
 	// MaxAge is the maximum number of days to retain old logger files based on the
 	// timestamp encoded in their filename.  Note that a day is defined as 24
@@ -44,12 +45,57 @@ type LogConf struct {
 	// using gzip.
 	Compress bool `json:"compress" yaml:"compress"`
 
+	// 日志分割类型，day,hour,size  default:hour
 	RotateType string `json:"rotate_type" yaml:"rotate_type"`
 }
 
-//生成时间格式
+// 生成时间格式
 func TimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 	enc.AppendString(t.Format("2006-01-02 15:04:05.000"))
+}
+
+func NewRotateWriter(conf *LogConf) (io.Writer, error) {
+	pathList := strings.Split(conf.Filename, "/")
+	baseLogPath := ""
+	len := len(pathList)
+	for i := 0; i < len-1; i++ {
+		os.Mkdir(strings.Join(pathList[:i], "/"), os.ModePerm)
+		baseLogPath += pathList[i] + string(os.PathSeparator)
+	}
+	baseLogPath += pathList[len-1:][0]
+	newLogName := baseLogPath[:strings.LastIndex(baseLogPath, ".")]
+	fileExe := baseLogPath[strings.LastIndex(baseLogPath, ".")+1:]
+	file := newLogName + `.%F.` + fileExe
+
+	ret, err := rotatelogs.New(
+		file,
+		rotatelogs.WithClock(rotatelogs.Local), // 使用本地时区，走的是标准库time对象的时区
+		//rotatelogs.WithLinkName(path[1]),       // 生成软链，指向最新日志文件
+		rotatelogs.WithMaxAge(time.Duration(conf.MaxAge)*time.Hour), // 文件最大保存时间
+		rotatelogs.WithRotationTime(time.Hour),                      // 日志切割时间间隔
+	)
+	switch conf.RotateType {
+	case "day":
+		ret, err = rotatelogs.New(
+			file,
+			rotatelogs.WithClock(rotatelogs.Local), // 使用本地时区，走的是标准库time对象的时区
+			//rotatelogs.WithLinkName(path[1]),       // 生成软链，指向最新日志文件
+			rotatelogs.WithMaxAge(time.Duration(conf.MaxAge)*time.Hour), // 文件最大保存时间
+			rotatelogs.WithRotationTime(24*time.Hour),                   // 日志切割时间间隔
+		)
+	case "size":
+		if conf.MaxSize > 0 {
+			ret, err = rotatelogs.New(
+				file,
+				rotatelogs.WithClock(rotatelogs.Local), // 使用本地时区，走的是标准库time对象的时区
+				//rotatelogs.WithLinkName(path[1]),       // 生成软链，指向最新日志文件
+				rotatelogs.WithMaxAge(time.Duration(conf.MaxAge)*time.Hour), // 文件最大保存时间
+				rotatelogs.WithRotationSize(conf.MaxSize),                   // 日志切割时间间隔
+			)
+		}
+	}
+
+	return ret, err
 }
 
 func NewZap(conf *LogConf, skipNum int, writers ...io.Writer) (*zap.SugaredLogger, error) {
@@ -92,28 +138,7 @@ func NewZap(conf *LogConf, skipNum int, writers ...io.Writer) (*zap.SugaredLogge
 	return logger.Sugar(), nil
 }
 
-func NewRotateWriter(conf *LogConf) (io.Writer, error) {
-	pathList := strings.Split(conf.Filename, "/")
-	baseLogPath := ""
-	len := len(pathList)
-	for i := 0; i < len-1; i++ {
-		os.Mkdir(strings.Join(pathList[:i], "/"), os.ModePerm)
-		baseLogPath += pathList[i] + string(os.PathSeparator)
-	}
-	baseLogPath += pathList[len-1:][0]
-	newLogName := baseLogPath[:strings.LastIndex(baseLogPath, ".")]
-	fileExe := baseLogPath[strings.LastIndex(baseLogPath, ".")+1:]
-	file := newLogName + `.%F.` + fileExe
-	return rotatelogs.New(
-		file,
-		rotatelogs.WithClock(rotatelogs.Local), // 使用本地时区，走的是标准库time对象的时区
-		//rotatelogs.WithLinkName(path[1]),       // 生成软链，指向最新日志文件
-		rotatelogs.WithMaxAge(time.Duration(conf.MaxAge)*24*time.Hour), // 文件最大保存时间
-		rotatelogs.WithRotationTime(24*time.Hour),                      // 日志切割时间间隔
-	)
-}
-
-//级别转换
+// 级别转换
 func parseLevel(lvl string) zapcore.Level {
 	switch strings.ToLower(lvl) {
 	case "panic", "dpanic":
