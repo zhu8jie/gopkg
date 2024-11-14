@@ -1,9 +1,11 @@
 package xutils
 
 import (
+	"bytes"
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -137,4 +139,12 @@ func Crc(strin string) uint32 {
 		return crc32.ChecksumIEEE(scratch[:len(strin)])
 	}
 	return crc32.ChecksumIEEE([]byte(strin))
+}
+
+func JsonMarshalUnEscape(o interface{}) ([]byte, error) {
+	bf := &bytes.Buffer{}
+	jsonEncoder := json.NewEncoder(bf)
+	jsonEncoder.SetEscapeHTML(false)
+	err := jsonEncoder.Encode(o)
+	return bf.Bytes(), err
 }
