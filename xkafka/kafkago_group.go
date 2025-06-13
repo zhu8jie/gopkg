@@ -20,27 +20,70 @@ package xkafka
 // /*
 // 正常来说下面的配置host topic partition 应该写在配置文件里
 // */
-// // const host = "localhost:9091"
-// // const topic = "my"
-// // const partition = 0
+// const host = "localhost:9091"
+// const topic = "my"
+// const partition = 0
 
 // /*
 // NewKafKaCon kafka的客户端连接的初始化方法
 // */
-// func NewKafKaCli(host, topic string, partition int ) (*kafka.Conn, error) {
+// func NewKafKa() (*kafka.Conn, error) {
 // 	return kafka.DialLeader(context.Background(), "tcp", host, topic, partition)
 // }
 
-// func (cli *kafka.Conn) SendMsg(msg string) error{
-// 	_, err := cli.WriteMessages(
-// 		kafka.Message{Value: []byte(cli)},
+// func main() {
+// 	writeByConn()
+// 	readByConn()
+
+// }
+
+// // writeByConn 基于Conn发送消息
+// func writeByConn() {
+
+// 	// 连接至Kafka集群的Leader节点
+// 	conn, err := NewKafKaCon()
+// 	if err != nil {
+// 		log.Fatal("failed to dial leader:", err)
+// 	}
+
+// 	// 设置发送消息的超时时间
+// 	conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
+// 	people1 := People{"Tmo",
+// 		"124"}
+// 	people2 := People{"Mac",
+// 		"124"}
+// 	people3 := People{"Joker",
+// 		"124"}
+// 	// 发送消息
+// 	str1, _ := json.Marshal(people1)
+// 	str2, _ := json.Marshal(people2)
+// 	str3, _ := json.Marshal(people3)
+// 	_, err = conn.WriteMessages(
+// 		kafka.Message{Value: []byte(str1)},
+// 		kafka.Message{Value: []byte(str2)},
+// 		kafka.Message{Value: []byte(str3)},
 // 	)
-// 	return err
+// 	if err != nil {
+// 		log.Fatal("failed to write messages:", err)
+// 	}
+
+// 	// 关闭连接
+// 	if err := conn.Close(); err != nil {
+// 		log.Fatal("failed to close writer:", err)
+// 	}
 // }
 
 // // readByConn 连接至kafka后接收消息
-// func (cli *kafka.Conn)ReadMsg() {
+// func readByConn() {
+// 	// 指定要连接的topic和partition
 
+// 	// 连接至Kafka的leader节点
+// 	conn, err := NewKafKaCon()
+// 	if err != nil {
+// 		log.Fatal("failed to dial leader:", err)
+// 	}
+// 	// 设置读取超时时间
+// 	conn.SetReadDeadline(time.Now().Add(10 * time.Second))
 // 	// 读取一批消息，得到的batch是一系列消息的迭代器
 // 	batch := conn.ReadBatch(10e3, 1e6) // fetch 10KB min, 1MB max
 

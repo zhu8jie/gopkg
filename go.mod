@@ -12,6 +12,7 @@ require (
 	github.com/jonboulle/clockwork v0.4.0 // indirect
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/lestrrat-go/strftime v1.0.6 // indirect
+	github.com/segmentio/kafka-go v0.4.48
 	go.uber.org/zap v1.20.0
 	gopkg.in/yaml.v2 v2.4.0
 	xorm.io/xorm v1.1.0
