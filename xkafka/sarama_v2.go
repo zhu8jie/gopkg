@@ -85,7 +85,7 @@ func (k *XKafkaConsumer) Start(f XkafkaConsumeMsg) error {
 				for {
 					msg := <-partitionConsumer.Messages()
 					if msg == nil {
-						k.Log.Errorf("partitionConsumer.Messages is nil %v", msg)
+						// k.Log.Errorf("partitionConsumer.Messages is nil %v", msg)
 						continue
 					}
 					err := f(XkafkaMsg{
