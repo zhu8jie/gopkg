@@ -13,7 +13,9 @@ type XKafkaConsumer struct {
 }
 
 func NewXKafkaConsumer(addrs, topics []string, log *zap.SugaredLogger) (*XKafkaConsumer, error) {
-	consumer, err := sarama.NewConsumer(addrs, nil)
+	config := sarama.NewConfig()
+	config.Consumer.Return.Errors = true
+	consumer, err := sarama.NewConsumer(addrs, config)
 	if err != nil {
 		return nil, err
 	}
@@ -72,15 +74,15 @@ func (k *XKafkaConsumer) Start(f XkafkaConsumeMsg) error {
 			return err
 		}
 
-		for partition := range partitionList {
+		for _, partition := range partitionList {
 			k.Log.Infof("topic: %v, partition: %v", topic, partition)
-			go func(topic string, partition int) {
-				partitionConsumer, err := k.Consumer.ConsumePartition(topic, int32(partition), sarama.OffsetNewest)
+			go func(topic string, partition int32) {
+				partitionConsumer, err := k.Consumer.ConsumePartition(topic, partition, sarama.OffsetNewest)
 				if err != nil {
 					k.Log.Errorf("loopConsumer err1: %v, partition: %v", err, partition)
 					return
 				}
-				defer partitionConsumer.Close()
+				defer partitionConsumer.AsyncClose()
 
 				for {
 					msg := <-partitionConsumer.Messages()
