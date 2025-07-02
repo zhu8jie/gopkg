@@ -15,6 +15,8 @@ import (
 	"os/signal"
 	"strconv"
 	"syscall"
+
+	"github.com/gofrs/uuid"
 )
 
 func SignalHandler() {
@@ -147,4 +149,9 @@ func JsonMarshalUnEscape(o interface{}) ([]byte, error) {
 	jsonEncoder.SetEscapeHTML(false)
 	err := jsonEncoder.Encode(o)
 	return bf.Bytes(), err
+}
+
+func GetUuid() string {
+	uu, _ := uuid.NewV4()
+	return uuid.Must(uu, nil).String()
 }
