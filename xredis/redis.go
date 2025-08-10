@@ -16,6 +16,7 @@ type GoRedisConf struct {
 	MinIdle     int           `json:"min_idle"`     // 最小活跃数，保证快速响应
 	Timeout     time.Duration `json:"timeout"`      // 客户端等待连接的最长时间
 	DialTimeout time.Duration `json:"dial_timeout"` // 建立新链接的超时时长
+	IdleTimeout time.Duration `json:"idle_timeout"` // 客户端关闭空闲连接的时间间隔。该时间间隔应小于服务器的超时时间
 }
 
 func NewRedisClient(redisCfg GoRedisConf) (*redis.Client, error) {
@@ -31,6 +32,9 @@ func NewRedisClient(redisCfg GoRedisConf) (*redis.Client, error) {
 	if redisCfg.DialTimeout == 0 {
 		redisCfg.DialTimeout = 1 * time.Second
 	}
+	if redisCfg.IdleTimeout == 0 {
+		redisCfg.IdleTimeout = 1 * time.Second
+	}
 	client := redis.NewClient(&redis.Options{
 		Addr:         redisCfg.Address,
 		Password:     redisCfg.Password,
@@ -40,6 +44,7 @@ func NewRedisClient(redisCfg GoRedisConf) (*redis.Client, error) {
 		PoolTimeout:  redisCfg.Timeout,
 		MinIdleConns: redisCfg.MinIdle,
 		DialTimeout:  redisCfg.DialTimeout,
+		IdleTimeout:  redisCfg.IdleTimeout,
 	})
 	err := client.Ping(context.Background()).Err()
 	return client, err
