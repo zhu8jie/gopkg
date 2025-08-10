@@ -11,20 +11,24 @@ type GoRedisConf struct {
 	Address     string        `json:"address"`
 	Password    string        `json:"password"`
 	Network     string        `json:"network"`
-	MaxIdle     int           `json:"max_idle"`
-	MaxActive   int           `json:"max_active"`
-	IdleTimeout time.Duration `json:"idle_timeout"`
 	DataBase    int           `json:"data_base"`
+	MaxIdle     int           `json:"max_idle"`     // 池子大小
+	MinIdle     int           `json:"min_idle"`     // 最小活跃数，保证快速响应
+	Timeout     time.Duration `json:"timeout"`      // 客户端等待连接的最长时间
+	DialTimeout time.Duration `json:"dial_timeout"` // 建立新链接的超时时长
+	IdleTimeout time.Duration `json:"idle_timeout"`
 }
 
 func NewRedisClient(redisCfg GoRedisConf) (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
-		Addr:        redisCfg.Address,
-		Network:     redisCfg.Network,
-		PoolSize:    redisCfg.MaxIdle,
-		IdleTimeout: redisCfg.IdleTimeout * time.Second,
-		DB:          redisCfg.DataBase,
-		Password:    redisCfg.Password,
+		Addr:         redisCfg.Address,
+		Password:     redisCfg.Password,
+		Network:      redisCfg.Network,
+		DB:           redisCfg.DataBase,
+		PoolSize:     redisCfg.MaxIdle,
+		PoolTimeout:  redisCfg.Timeout,
+		MinIdleConns: redisCfg.MinIdle,
+		DialTimeout:  redisCfg.DialTimeout,
 	})
 	err := client.Ping(context.Background()).Err()
 	return client, err
