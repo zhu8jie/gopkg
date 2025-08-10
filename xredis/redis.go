@@ -16,7 +16,6 @@ type GoRedisConf struct {
 	MinIdle     int           `json:"min_idle"`     // 最小活跃数，保证快速响应
 	Timeout     time.Duration `json:"timeout"`      // 客户端等待连接的最长时间
 	DialTimeout time.Duration `json:"dial_timeout"` // 建立新链接的超时时长
-	IdleTimeout time.Duration `json:"idle_timeout"`
 }
 
 func NewRedisClient(redisCfg GoRedisConf) (*redis.Client, error) {
