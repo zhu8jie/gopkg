@@ -19,6 +19,18 @@ type GoRedisConf struct {
 }
 
 func NewRedisClient(redisCfg GoRedisConf) (*redis.Client, error) {
+	if redisCfg.MaxIdle == 0 {
+		redisCfg.MaxIdle = 10
+	}
+	if redisCfg.Timeout == 0 {
+		redisCfg.Timeout = 10 * time.Second
+	}
+	if redisCfg.MinIdle == 0 {
+		redisCfg.MinIdle = 2
+	}
+	if redisCfg.DialTimeout == 0 {
+		redisCfg.DialTimeout = 1 * time.Second
+	}
 	client := redis.NewClient(&redis.Options{
 		Addr:         redisCfg.Address,
 		Password:     redisCfg.Password,
