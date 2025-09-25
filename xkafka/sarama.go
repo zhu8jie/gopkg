@@ -113,15 +113,15 @@ func (sc *SaramaConsumer) Start(f ConsumeMsg) error {
 		// 异步从每个分区消费信息
 		go func(partition int) {
 			// 针对每个分区创建一个对应的分区消费者
-			pc, err := sc.consumer.ConsumePartition(sc.topic, int32(partition), sarama.OffsetNewest)
+			partitionConsumer, err := sc.consumer.ConsumePartition(sc.topic, int32(partition), sarama.OffsetNewest)
 			if err != nil {
 				sc.log.Errorf("failed to start consumer for partition %d,err:%v\n", partition, err)
 			}
-			defer pc.AsyncClose()
+			// defer pc.AsyncClose()
+			defer partitionConsumer.Close()
 			// sc.log.Debugf("SaramaConsumer pc number: %v", partition)
-
-			for msg := range pc.Messages() {
-				// sc.log.Debugf("SaramaConsumer get message: %v", msg)
+			for {
+				msg := <-partitionConsumer.Messages()
 				err := f(SaramaMsg{
 					Key:       msg.Key,
 					Value:     msg.Value,
@@ -132,6 +132,19 @@ func (sc *SaramaConsumer) Start(f ConsumeMsg) error {
 					sc.log.Errorf("SaramaConsumer consume error: %v", err)
 				}
 			}
+
+			// for msg := range pc.Messages() {
+			// 	// sc.log.Debugf("SaramaConsumer get message: %v", msg)
+			// 	err := f(SaramaMsg{
+			// 		Key:       msg.Key,
+			// 		Value:     msg.Value,
+			// 		Partition: msg.Partition,
+			// 		Offset:    msg.Offset,
+			// 	})
+			// 	if err != nil {
+			// 		sc.log.Errorf("SaramaConsumer consume error: %v", err)
+			// 	}
+			// }
 		}(partition)
 	}
 	return nil
