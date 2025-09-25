@@ -122,6 +122,10 @@ func (sc *SaramaConsumer) Start(f ConsumeMsg) error {
 			// sc.log.Debugf("SaramaConsumer pc number: %v", partition)
 			for {
 				msg := <-partitionConsumer.Messages()
+				if msg == nil {
+					sc.log.Errorf("partitionConsumer.Messages.error: msg is nil")
+					continue
+				}
 				err := f(SaramaMsg{
 					Key:       msg.Key,
 					Value:     msg.Value,
