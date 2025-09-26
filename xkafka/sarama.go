@@ -123,7 +123,6 @@ func (sc *SaramaConsumer) Start(f ConsumeMsg) error {
 			for {
 				msg := <-partitionConsumer.Messages()
 				if msg == nil {
-					sc.log.Errorf("partitionConsumer.Messages.error: msg is nil")
 					continue
 				}
 				err := f(SaramaMsg{
