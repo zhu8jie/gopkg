@@ -1,11 +1,9 @@
 package xkafka
 
 import (
-	"context"
 	"time"
 
 	"github.com/Shopify/sarama"
-	"github.com/zhu8jie/gopkg/xutils"
 	"go.uber.org/zap"
 )
 
@@ -162,87 +160,87 @@ func (sc *SaramaConsumer) Close() error {
 	return nil
 }
 
-type ConsumerGroupConf struct {
-	Addrs   []string
-	Topic   []string
-	Log     *zap.SugaredLogger
-	GroupId string
-}
+// type ConsumerGroupConf struct {
+// 	Addrs   []string
+// 	Topic   []string
+// 	Log     *zap.SugaredLogger
+// 	GroupId string
+// }
 
-type SaramaConsumerGroup struct {
-	consumer sarama.ConsumerGroup
-	Topic    []string
-	log      *zap.SugaredLogger
-}
+// type SaramaConsumerGroup struct {
+// 	consumer sarama.ConsumerGroup
+// 	Topic    []string
+// 	log      *zap.SugaredLogger
+// }
 
-func NewSaramaConsumerGroup(conf *ConsumerGroupConf) (*SaramaConsumerGroup, error) {
-	ret := new(SaramaConsumerGroup)
-	ret.Topic = conf.Topic
-	ret.log = conf.Log
+// func NewSaramaConsumerGroup(conf *ConsumerGroupConf) (*SaramaConsumerGroup, error) {
+// 	ret := new(SaramaConsumerGroup)
+// 	ret.Topic = conf.Topic
+// 	ret.log = conf.Log
 
-	config := sarama.NewConfig()
-	config.Version = sarama.V2_2_0_0
-	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategySticky
+// 	config := sarama.NewConfig()
+// 	config.Version = sarama.V2_2_0_0
+// 	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategySticky
 
-	if conf.GroupId == "" {
-		conf.GroupId = xutils.Int64ToStr(time.Now().UnixNano())
-	}
-	// 连接kafka
-	consumerGroup, err := sarama.NewConsumerGroup(conf.Addrs, conf.GroupId, config)
-	ret.consumer = consumerGroup
+// 	if conf.GroupId == "" {
+// 		conf.GroupId = xutils.Int64ToStr(time.Now().UnixNano())
+// 	}
+// 	// 连接kafka
+// 	consumerGroup, err := sarama.NewConsumerGroup(conf.Addrs, conf.GroupId, config)
+// 	ret.consumer = consumerGroup
 
-	return ret, err
-}
+// 	return ret, err
+// }
 
-func (sc *SaramaConsumerGroup) Start(f ConsumeMsg) error {
-	sc.log.Debugf("SaramaConsumerGroup start ...")
+// func (sc *SaramaConsumerGroup) Start(f ConsumeMsg) error {
+// 	sc.log.Debugf("SaramaConsumerGroup start ...")
 
-	go func() {
-		h := ConsumerGroupHandler{
-			f:   f,
-			log: sc.log,
-		}
-		err := sc.consumer.Consume(context.Background(), sc.Topic, h)
-		if err != nil {
-			sc.log.Errorf("SaramaConsumerGroup consume error: %v", err)
-		}
-	}()
+// 	go func() {
+// 		h := ConsumerGroupHandler{
+// 			f:   f,
+// 			log: sc.log,
+// 		}
+// 		err := sc.consumer.Consume(context.Background(), sc.Topic, h)
+// 		if err != nil {
+// 			sc.log.Errorf("SaramaConsumerGroup consume error: %v", err)
+// 		}
+// 	}()
 
-	// sc.log.Debugf("SaramaConsumer partition for end")
-	return nil
-}
+// 	// sc.log.Debugf("SaramaConsumer partition for end")
+// 	return nil
+// }
 
-func (sc *SaramaConsumerGroup) Close() error {
-	err := sc.consumer.Close()
-	if err != nil {
-		return err
-	}
+// func (sc *SaramaConsumerGroup) Close() error {
+// 	err := sc.consumer.Close()
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
-type ConsumerGroupHandler struct {
-	f   ConsumeMsg
-	log *zap.SugaredLogger
-}
+// type ConsumerGroupHandler struct {
+// 	f   ConsumeMsg
+// 	log *zap.SugaredLogger
+// }
 
-// 实现ConsumerGroupHandler接口
-func (h ConsumerGroupHandler) Setup(sarama.ConsumerGroupSession) error   { return nil }
-func (h ConsumerGroupHandler) Cleanup(sarama.ConsumerGroupSession) error { return nil }
-func (h ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	for msg := range claim.Messages() {
-		// fmt.Printf("Message Value: %s\n", string(msg.Value))
-		// session.MarkMessage(msg, "")
-		err := h.f(SaramaMsg{
-			Key:       msg.Key,
-			Value:     msg.Value,
-			Partition: msg.Partition,
-			Offset:    msg.Offset,
-		})
+// // 实现ConsumerGroupHandler接口
+// func (h ConsumerGroupHandler) Setup(sarama.ConsumerGroupSession) error   { return nil }
+// func (h ConsumerGroupHandler) Cleanup(sarama.ConsumerGroupSession) error { return nil }
+// func (h ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+// 	for msg := range claim.Messages() {
+// 		// fmt.Printf("Message Value: %s\n", string(msg.Value))
+// 		// session.MarkMessage(msg, "")
+// 		err := h.f(SaramaMsg{
+// 			Key:       msg.Key,
+// 			Value:     msg.Value,
+// 			Partition: msg.Partition,
+// 			Offset:    msg.Offset,
+// 		})
 
-		if err != nil {
-			h.log.Errorf("ConsumerGroupHandler do message error: %v", err)
-		}
-	}
-	return nil
-}
+// 		if err != nil {
+// 			h.log.Errorf("ConsumerGroupHandler do message error: %v", err)
+// 		}
+// 	}
+// 	return nil
+// }
