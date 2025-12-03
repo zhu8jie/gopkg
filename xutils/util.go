@@ -155,3 +155,35 @@ func GetUuid() string {
 	uu, _ := uuid.NewV4()
 	return uuid.Must(uu, nil).String()
 }
+
+func IntArrJoin2String(a []int, sep ...string) string {
+	sepStr := ","
+	if len(sep) > 0 {
+		sepStr = sep[0]
+	}
+
+	ret := ""
+	for idx, i := range a {
+		if idx != 0 {
+			ret = ret + sepStr
+		}
+		ret = ret + IntToStr(i)
+	}
+	return ret
+}
+
+func Int64ArrJoin2String(a []int64, sep ...string) string {
+	sepStr := ","
+	if len(sep) > 0 {
+		sepStr = sep[0]
+	}
+
+	ret := ""
+	for idx, i := range a {
+		if idx != 0 {
+			ret = ret + sepStr
+		}
+		ret = ret + Int64ToStr(i)
+	}
+	return ret
+}
