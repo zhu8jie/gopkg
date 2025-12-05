@@ -195,3 +195,11 @@ func Int64To16Hex(num int64) string {
 	}
 	return ret
 }
+
+func IntTo16Hex(num int) string {
+	ret := fmt.Sprintf("%x", num)
+	if len(ret) < 2 {
+		ret = "0" + ret
+	}
+	return ret
+}
