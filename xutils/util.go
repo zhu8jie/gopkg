@@ -187,3 +187,11 @@ func Int64ArrJoin2String(a []int64, sep ...string) string {
 	}
 	return ret
 }
+
+func Int64To16Hex(num int64) string {
+	ret := fmt.Sprintf("%x", num)
+	if len(ret) < 2 {
+		ret = "0" + ret
+	}
+	return ret
+}
