@@ -18,6 +18,7 @@ func NewSaramaConsumerGroup(addr, topics []string, groupId string, log *zap.Suga
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true                  // 返回所有错误
 	config.Consumer.Offsets.Initial = sarama.OffsetNewest // 从最早的消息开始消费
+	config.Consumer.Fetch.Min = 4000
 	// config.Group.Return.Notifications = true              // 返回通知信息
 
 	// 创建消费者组客户端

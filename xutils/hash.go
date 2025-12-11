@@ -9,3 +9,5 @@ func HashString(s string, mod uint32) uint32 {
 	h.Write([]byte(s))
 	return h.Sum32() % mod
 }
+
+
