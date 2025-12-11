@@ -13,12 +13,14 @@ type SaramaConsumerGroup struct {
 	log    *zap.SugaredLogger
 }
 
-func NewSaramaConsumerGroup(addr, topics []string, groupId string, log *zap.SugaredLogger) (*SaramaConsumerGroup, error) {
+func NewSaramaConsumerGroup(addr, topics []string, groupId string, log *zap.SugaredLogger, fetchMin int32) (*SaramaConsumerGroup, error) {
 	// 配置消费者组
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true                  // 返回所有错误
 	config.Consumer.Offsets.Initial = sarama.OffsetNewest // 从最早的消息开始消费
-	config.Consumer.Fetch.Min = 4000
+	if fetchMin > 0 {
+		config.Consumer.Fetch.Min = fetchMin
+	}
 	// config.Group.Return.Notifications = true              // 返回通知信息
 
 	// 创建消费者组客户端
