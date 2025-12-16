@@ -22,6 +22,8 @@ func NewSaramaConsumerGroup(addr, topics []string, groupId string, log *zap.Suga
 		saramaCfg.Consumer.Offsets.Initial = sarama.OffsetNewest // 初始偏移量
 		saramaCfg.Consumer.Offsets.AutoCommit.Enable = false     // 开启自动提交
 		// saramaCfg.Consumer.Offsets.AutoCommit.Interval = 5 * time.Second // 自动提交间隔
+		// saramaCfg.Consumer.Fetch.Min = 20
+		// saramaCfg.Consumer.MaxWaitTime
 
 		// 其他配置
 		saramaCfg.Version = sarama.V2_5_0_0
@@ -83,6 +85,7 @@ type ConsumerGroupHandler struct {
 func (h ConsumerGroupHandler) Setup(sarama.ConsumerGroupSession) error   { return nil }
 func (h ConsumerGroupHandler) Cleanup(sarama.ConsumerGroupSession) error { return nil }
 func (h ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	num := 0
 	for msg := range claim.Messages() {
 		// fmt.Printf("Message Value: %s\n", string(msg.Value))
 		// session.MarkMessage(msg, "")
@@ -96,9 +99,12 @@ func (h ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, 
 		if err != nil {
 			h.log.Errorf("ConsumerGroupHandler do message error: %v", err)
 		}
-
-		session.MarkMessage(msg, "")
-		session.Commit()
+		num++
+		if num > 3000 {
+			session.MarkMessage(msg, "")
+			session.Commit()
+			num = 0
+		}
 	}
 	return nil
 }
