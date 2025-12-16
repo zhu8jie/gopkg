@@ -22,7 +22,7 @@ func NewSaramaConsumerGroup(addr, topics []string, groupId string, log *zap.Suga
 		saramaCfg.Consumer.Return.Errors = true                          // 返回所有错误
 		saramaCfg.Consumer.Offsets.Initial = sarama.OffsetNewest         // 初始偏移量
 		saramaCfg.Consumer.Offsets.AutoCommit.Enable = true              // 开启自动提交
-		saramaCfg.Consumer.Offsets.AutoCommit.Interval = 1 * time.Second // 自动提交间隔
+		saramaCfg.Consumer.Offsets.AutoCommit.Interval = 5 * time.Second // 自动提交间隔
 
 		// 其他配置
 		saramaCfg.Version = sarama.V2_5_0_0
