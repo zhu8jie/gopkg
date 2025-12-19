@@ -2,6 +2,7 @@ package xkafka
 
 import (
 	"context"
+	"time"
 
 	"github.com/Shopify/sarama"
 	"go.uber.org/zap"
@@ -100,11 +101,12 @@ func (h ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, 
 			h.log.Errorf("ConsumerGroupHandler do message error: %v", err)
 		}
 		num++
-		if num > 3000 {
+		if num > 500 {
 			session.MarkMessage(msg, "")
 			session.Commit()
 			num = 0
 		}
 	}
-	return nil
+	time.Sleep(time.Second * 10)
+	return h.ConsumeClaim(session, claim)
 }
